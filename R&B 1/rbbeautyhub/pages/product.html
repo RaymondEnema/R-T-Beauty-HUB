@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Product | R&T Beauty Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/animations.css">
+<style>
+.product-detail { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; padding: 40px 0; }
+.product-gallery { position: sticky; top: 100px; }
+.product-main-img { width: 100%; aspect-ratio: 1; background: #f5f5f5; border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
+.product-main-img img { width: 100%; height: 100%; object-fit: cover; }
+.product-info h1 { font-size: 24px; margin-bottom: 12px; }
+.product-rating-detail { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.product-rating-detail .stars { font-size: 16px; color: #FFC107; }
+.product-rating-detail span { font-size: 14px; color: #666; }
+.product-price-detail { margin-bottom: 20px; }
+.product-price-detail .current-price { font-size: 28px; font-weight: 700; color: #E91E63; }
+.product-price-detail .original-price { font-size: 18px; color: #999; text-decoration: line-through; margin-left: 12px; }
+.product-price-detail .discount-pct { font-size: 14px; color: #4CAF50; font-weight: 700; margin-left: 12px; }
+.product-description { margin-bottom: 24px; line-height: 1.8; color: #555; }
+.product-meta { margin-bottom: 24px; }
+.product-meta p { margin-bottom: 8px; font-size: 14px; }
+.product-meta strong { color: #333; }
+.stock-status { display: inline-block; padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 600; }
+.stock-in { background: #E8F5E9; color: #2E7D32; }
+.stock-low { background: #FFF3E0; color: #E65100; }
+.stock-out { background: #FFEBEE; color: #C62828; }
+.qty-selector { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.qty-selector label { font-weight: 500; }
+.qty-controls { display: flex; align-items: center; gap: 8px; }
+.qty-btn { width: 36px; height: 36px; border: 1px solid #ddd; background: #fff; border-radius: 4px; cursor: pointer; font-size: 18px; }
+.qty-btn:hover { border-color: #E91E63; color: #E91E63; }
+.qty-input { width: 60px; text-align: center; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: 'Poppins', sans-serif; font-size: 14px; }
+.product-actions { display: flex; gap: 12px; margin-bottom: 24px; }
+.product-actions .btn { flex: 1; padding: 14px; font-size: 16px; }
+.related-section { padding: 40px 0; }
+.related-section h2 { font-size: 22px; margin-bottom: 20px; }
+@media (max-width: 768px) { .product-detail { grid-template-columns: 1fr; } .product-gallery { position: static; } }
+</style>
+<link rel="icon" type="image/jpeg" href="../images/logo.png">
+</head>
+<body>
+
+<header class="header">
+  <div class="container header-inner">
+    <a href="../index.html" class="logo">
+      <img src="../images/logo.png" alt="R&T Beauty Hub" class="logo-img">
+    </a>
+    <div class="header-actions">
+      <a href="cart.html" class="header-action-link cart-link">
+        <svg width="22" height="22" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1z" fill="currentColor"/></svg>
+        <span>Cart</span>
+        <span class="badge" id="cartCount" style="display:none;">0</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="../index.html">Home</a> <span>/</span> <a href="products.html">Products</a> <span>/</span> <span id="breadcrumbName">Product</span></div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="product-detail" id="productDetail"></div>
+</div>
+
+<div class="container related-section">
+  <h2>You May Also Like</h2>
+  <div class="product-grid" id="relatedGrid"></div>
+</div>
+
+<footer class="footer">
+  <div class="footer-bottom">
+    <div class="container">
+      <div class="footer-bottom-inner">
+        <p>&copy; 2026 R&T Beauty Hub. All rights reserved.</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="../js/data.js"></script>
+<script src="../js/app.js"></script>
+<script src="../js/animations.js"></script>
+<script>
+const params = new URLSearchParams(window.location.search);
+const productId = params.get('id');
+
+function renderProduct() {
+  const product = getProductById(productId);
+  if (!product) {
+    document.getElementById('productDetail').innerHTML = '<div class="empty-state"><h3>Product not found</h3><a href="products.html" class="btn btn-primary">Browse Products</a></div>';
+    return;
+  }
+
+  const discount = calculateDiscount(product.originalPrice, product.price);
+  const stockStatus = product.stock > 20 ? 'in' : product.stock > 0 ? 'low' : 'out';
+  const stockText = product.stock > 20 ? 'In Stock' : product.stock > 0 ? `Only ${product.stock} left` : 'Out of Stock';
+
+  document.title = product.name + ' | R&T Beauty Hub';
+  document.getElementById('breadcrumbName').textContent = product.name;
+
+  document.getElementById('productDetail').innerHTML = `
+    <div class="product-gallery">
+      <div class="product-main-img">
+        <img src="${product.image}" alt="${product.name}">
+      </div>
+    </div>
+    <div class="product-info">
+      <h1>${product.name}</h1>
+      <div class="product-rating-detail">
+        <span class="stars">${generateStars(product.rating)}</span>
+        <span>${product.rating} (${product.reviews} reviews)</span>
+      </div>
+      <div class="product-price-detail">
+        <span class="current-price">${formatPrice(product.price)}</span>
+        <span class="original-price">${formatPrice(product.originalPrice)}</span>
+        <span class="discount-pct">-${discount}%</span>
+      </div>
+      <p class="product-description">${product.description}</p>
+      <div class="product-meta">
+        <p><strong>Category:</strong> ${product.category.charAt(0).toUpperCase() + product.category.slice(1)}</p>
+        <p><strong>Brand:</strong> ${product.brand.charAt(0).toUpperCase() + product.brand.slice(1)}</p>
+        <p><strong>Availability:</strong> <span class="stock-status stock-${stockStatus}">${stockText}</span></p>
+      </div>
+      <div class="qty-selector">
+        <label>Quantity:</label>
+        <div class="qty-controls">
+          <button class="qty-btn" onclick="changeQty(-1)">−</button>
+          <input type="number" class="qty-input" id="qtyInput" value="1" min="1" max="${product.stock}">
+          <button class="qty-btn" onclick="changeQty(1)">+</button>
+        </div>
+      </div>
+      <div class="product-actions">
+        <button class="btn btn-primary" onclick="addWithQty()" ${product.stock === 0 ? 'disabled' : ''}>
+          Add to Cart
+        </button>
+        <button class="btn btn-outline" onclick="toggleWishlist(${product.id}); showToast('Wishlist updated');">
+          ♡ Wishlist
+        </button>
+      </div>
+    </div>
+  `;
+
+  // Related products
+  const related = getActiveProducts().filter(p => p.category === product.category && p.id !== product.id).slice(0, 6);
+  renderProductGrid('relatedGrid', related);
+}
+
+function changeQty(delta) {
+  const input = document.getElementById('qtyInput');
+  const newVal = parseInt(input.value) + delta;
+  if (newVal >= 1 && newVal <= parseInt(input.max)) {
+    input.value = newVal;
+  }
+}
+
+function addWithQty() {
+  const qty = parseInt(document.getElementById('qtyInput').value);
+  addToCart(parseInt(productId), qty);
+}
+
+renderProduct();
+</script>
+</body>
+</html>

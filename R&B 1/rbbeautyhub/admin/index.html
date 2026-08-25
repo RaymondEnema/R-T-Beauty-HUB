@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin Dashboard | R&T Beauty Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/animations.css">
+<link rel="icon" type="image/png" href="../images/logo.png">
+<style>
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+.modal-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: scale(0.9) translateY(20px);
+  transition: transform 0.3s ease;
+}
+.modal-overlay.show .modal {
+  transform: scale(1) translateY(0);
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.modal-header h3 { margin: 0; font-size: 18px; }
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f5f5f5;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-close:hover { background: #e0e0e0; }
+.modal-body { padding: 24px; }
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+.delete-btn {
+  background: #F44336;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+.delete-btn:hover { background: #D32F2F; }
+.action-btns { display: flex; gap: 6px; }
+.image-upload-area {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #fafafa;
+}
+.image-upload-area:hover { border-color: #E91E63; background: #fff; }
+.image-upload-area.dragover { border-color: #E91E63; background: #fce4ec; }
+.image-upload-area input[type="file"] { display: none; }
+.upload-placeholder { color: #999; font-size: 13px; }
+.upload-placeholder svg { margin-bottom: 8px; }
+.image-preview-wrap { margin-top: 12px; position: relative; display: inline-block; }
+.image-preview-wrap img { width: 120px; height: 120px; object-fit: cover; border-radius: 8px; border: 2px solid #e0e0e0; }
+.image-preview-wrap .remove-preview {
+  position: absolute; top: -8px; right: -8px; width: 24px; height: 24px;
+  background: #F44336; color: #fff; border: none; border-radius: 50%;
+  cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center;
+}
+.edit-image-preview { display: flex; gap: 16px; align-items: flex-start; }
+.edit-current-img { flex-shrink: 0; }
+.edit-current-img img { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 2px solid #e0e0e0; }
+.edit-current-img p { font-size: 12px; color: #999; margin-top: 4px; }
+.no-image-placeholder { width: 100px; height: 100px; background: #f5f5f5; border: 2px dashed #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<header class="header" style="background:#1a1a2e;">
+  <div class="container header-inner">
+    <a href="../index.html" class="logo">
+      <img src="../images/logo.png" alt="R&T Beauty Hub" class="logo-img">
+    </a>
+    <span style="color:#fff; font-size:14px;">Admin Dashboard</span>
+    <div class="header-actions">
+      <a href="../index.html" class="header-action-link" style="color:#fff;">
+        <span>← Back to Store</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar-header">
+      <h3>Admin Panel</h3>
+    </div>
+    <nav class="admin-nav">
+      <a href="#" class="active" onclick="showSection('dashboard', this)">📊 Dashboard</a>
+      <a href="#" onclick="showSection('products', this)">📦 Products</a>
+      <a href="#" onclick="showSection('orders', this)">🛍️ Orders</a>
+      <a href="#" onclick="showSection('customers', this)">👥 Customers</a>
+      <a href="#" onclick="showSection('add-product', this)">➕ Add Product</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+    <!-- Dashboard -->
+    <div id="section-dashboard">
+      <h2 style="margin-bottom:24px;">Dashboard Overview</h2>
+      <div class="admin-stats">
+        <div class="stat-card">
+          <h4>Total Revenue</h4>
+          <div class="stat-value" id="statRevenue">₦0</div>
+          <div class="stat-change">↑ 12% from last month</div>
+        </div>
+        <div class="stat-card">
+          <h4>Total Orders</h4>
+          <div class="stat-value" id="statOrders">0</div>
+          <div class="stat-change">↑ 8% from last month</div>
+        </div>
+        <div class="stat-card">
+          <h4>Total Products</h4>
+          <div class="stat-value" id="statProducts">0</div>
+          <div class="stat-change">Active listings</div>
+        </div>
+        <div class="stat-card">
+          <h4>Customers</h4>
+          <div class="stat-value" id="statCustomers">0</div>
+          <div class="stat-change">Registered users</div>
+        </div>
+      </div>
+      <div class="admin-card">
+        <div class="admin-card-header"><h3>Recent Orders</h3></div>
+        <table class="admin-table">
+          <thead><tr><th>Order ID</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="recentOrdersTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Products -->
+    <div id="section-products" style="display:none;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+        <h2>Products</h2>
+        <button class="btn btn-primary" onclick="showSection('add-product', document.querySelector('.admin-nav a:last-child'))">+ Add Product</button>
+      </div>
+      <div class="admin-card">
+        <table class="admin-table">
+          <thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead>
+          <tbody id="productsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Orders -->
+    <div id="section-orders" style="display:none;">
+      <h2 style="margin-bottom:24px;">All Orders</h2>
+      <div class="admin-card">
+        <table class="admin-table">
+          <thead><tr><th>Order ID</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+          <tbody id="allOrdersTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Customers -->
+    <div id="section-customers" style="display:none;">
+      <h2 style="margin-bottom:24px;">Customers</h2>
+      <div class="admin-card">
+        <table class="admin-table">
+          <thead><tr><th>Name</th><th>Email</th><th>Joined</th></tr></thead>
+          <tbody id="customersTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Add Product -->
+    <div id="section-add-product" style="display:none;">
+      <h2 style="margin-bottom:24px;">Add New Product</h2>
+      <div class="admin-card" style="padding:24px;">
+        <form id="addProductForm">
+          <div class="form-row">
+            <div class="form-group"><label>Product Name</label><input type="text" id="newProdName" required></div>
+            <div class="form-group"><label>Category</label>
+              <select id="newProdCat" required>
+                <option value="skincare">Skincare</option><option value="makeup">Makeup</option>
+                <option value="haircare">Hair Care</option><option value="fragrance">Fragrance</option>
+                <option value="electronics">Electronics</option><option value="fashion">Fashion</option>
+                <option value="home">Home & Kitchen</option><option value="health">Health & Wellness</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Price (₦)</label><input type="number" id="newProdPrice" required></div>
+            <div class="form-group"><label>Original Price (₦)</label><input type="number" id="newProdOrigPrice" required></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Brand</label><input type="text" id="newProdBrand" required></div>
+            <div class="form-group"><label>Stock</label><input type="number" id="newProdStock" required></div>
+          </div>
+          <div class="form-group"><label>Rating (1-5)</label><input type="number" id="newProdRating" min="1" max="5" step="0.1" value="4.5" required></div>
+          <div class="form-group">
+            <label>Product Image</label>
+            <div class="image-upload-area" id="addUploadArea" onclick="document.getElementById('newProdImageFile').click()">
+              <input type="file" id="newProdImageFile" accept="image/*" onchange="previewAddImage(event)">
+              <div class="upload-placeholder" id="addPlaceholder">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="#999"><path d="M19 7v2.99s-1.99.01-2 0V7h-3s.01-1.99 0-2h3V2h2v3h3v2h-3zm-3 4V8h-3V5H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-8h-3zM5 19l3-4 2 3 3-4 4 5H5z"/></svg>
+                <p>Click to upload or drag & drop</p>
+                <p style="font-size:11px; color:#bbb;">JPG, PNG, WEBP (max 2MB)</p>
+              </div>
+              <div class="image-preview-wrap" id="addPreviewWrap" style="display:none;">
+                <img id="addPreviewImg" src="" alt="Preview">
+                <button type="button" class="remove-preview" onclick="event.stopPropagation(); removeAddPreview()">×</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-group"><label>Description</label><textarea id="newProdDesc" rows="3" required></textarea></div>
+          <div style="display:flex; gap:12px;">
+            <button type="submit" class="btn btn-primary">Add Product</button>
+            <button type="button" class="btn btn-outline" onclick="showSection('products', document.querySelector('.admin-nav a:nth-child(2))')">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Edit Product Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Edit Product</h3>
+      <button class="modal-close" onclick="closeEditModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <form id="editProductForm">
+        <input type="hidden" id="editProdId">
+        <div class="form-row">
+          <div class="form-group"><label>Product Name</label><input type="text" id="editProdName" required></div>
+          <div class="form-group"><label>Category</label>
+            <select id="editProdCat" required>
+              <option value="skincare">Skincare</option><option value="makeup">Makeup</option>
+              <option value="haircare">Hair Care</option><option value="fragrance">Fragrance</option>
+              <option value="electronics">Electronics</option><option value="fashion">Fashion</option>
+              <option value="home">Home & Kitchen</option><option value="health">Health & Wellness</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Price (₦)</label><input type="number" id="editProdPrice" required></div>
+          <div class="form-group"><label>Original Price (₦)</label><input type="number" id="editProdOrigPrice" required></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Brand</label><input type="text" id="editProdBrand" required></div>
+          <div class="form-group"><label>Stock</label><input type="number" id="editProdStock" required></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Rating (1-5)</label><input type="number" id="editProdRating" min="1" max="5" step="0.1" required></div>
+          <div class="form-group"><label>Badge</label>
+            <select id="editProdBadge">
+              <option value="">None</option><option value="sale">Sale</option>
+              <option value="new">New</option><option value="hot">Hot</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Product Image</label>
+          <div class="edit-image-preview">
+            <div class="edit-current-img" id="editCurrentImgWrap">
+              <img id="editCurrentImg" src="" alt="Current">
+              <p>Current image</p>
+            </div>
+            <div style="flex:1;">
+              <div class="image-upload-area" id="editUploadArea" onclick="document.getElementById('editProdImageFile').click()" style="padding:12px;">
+                <input type="file" id="editProdImageFile" accept="image/*" onchange="previewEditImage(event)">
+                <div class="upload-placeholder" id="editPlaceholder">
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="#999"><path d="M19 7v2.99s-1.99.01-2 0V7h-3s.01-1.99 0-2h3V2h2v3h3v2h-3zm-3 4V8h-3V5H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-8h-3zM5 19l3-4 2 3 3-4 4 5H5z"/></svg>
+                  <p style="font-size:12px;">Click to upload new image</p>
+                </div>
+                <div class="image-preview-wrap" id="editPreviewWrap" style="display:none;">
+                  <img id="editPreviewImg" src="" alt="Preview">
+                  <button type="button" class="remove-preview" onclick="event.stopPropagation(); removeEditPreview()">×</button>
+                </div>
+              </div>
+              <p style="font-size:11px; color:#999; margin-top:6px;">Leave empty to keep current image</p>
+            </div>
+          </div>
+        </div>
+        <div class="form-group"><label>Description</label><textarea id="editProdDesc" rows="3" required></textarea></div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="delete-btn" onclick="deleteProduct()">🗑 Delete Product</button>
+      <button class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProduct()">💾 Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <h3>⚠️ Confirm Delete</h3>
+      <button class="modal-close" onclick="closeDeleteModal()">×</button>
+    </div>
+    <div class="modal-body" style="text-align:center;">
+      <p style="font-size:16px; margin-bottom:8px;">Are you sure you want to delete this product?</p>
+      <p style="color:#666; font-size:14px;" id="deleteProdName"></p>
+      <p style="color:#F44336; font-size:13px; margin-top:12px;">This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer" style="justify-content:center;">
+      <button class="btn btn-outline" onclick="closeDeleteModal()">Cancel</button>
+      <button class="delete-btn" onclick="confirmDelete()">Yes, Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="../js/data.js"></script>
+<script src="../js/app.js"></script>
+<script src="../js/animations.js"></script>
+<script>
+let editingProductId = null;
+let deletingProductId = null;
+let addImageData = null;
+let editImageData = null;
+
+// ===== FILE UPLOAD HELPERS =====
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function validateImage(file) {
+  const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  if (!validTypes.includes(file.type)) { showToast('Please upload JPG, PNG, or WEBP', 'error'); return false; }
+  if (file.size > 2 * 1024 * 1024) { showToast('Image must be under 2MB', 'error'); return false; }
+  return true;
+}
+
+// ===== ADD PRODUCT IMAGE =====
+async function previewAddImage(e) {
+  const file = e.target.files[0];
+  if (!file || !validateImage(file)) return;
+  addImageData = await readFileAsDataURL(file);
+  document.getElementById('addPreviewImg').src = addImageData;
+  document.getElementById('addPlaceholder').style.display = 'none';
+  document.getElementById('addPreviewWrap').style.display = 'inline-block';
+}
+
+function removeAddPreview() {
+  addImageData = null;
+  document.getElementById('newProdImageFile').value = '';
+  document.getElementById('addPreviewImg').src = '';
+  document.getElementById('addPlaceholder').style.display = 'block';
+  document.getElementById('addPreviewWrap').style.display = 'none';
+}
+
+// Drag & drop for add
+const addUploadArea = document.getElementById('addUploadArea');
+if (addUploadArea) {
+  addUploadArea.addEventListener('dragover', (e) => { e.preventDefault(); addUploadArea.classList.add('dragover'); });
+  addUploadArea.addEventListener('dragleave', () => addUploadArea.classList.remove('dragover'));
+  addUploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    addUploadArea.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      const input = document.getElementById('newProdImageFile');
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      input.files = dt.files;
+      input.dispatchEvent(new Event('change'));
+    }
+  });
+}
+
+// ===== EDIT PRODUCT IMAGE =====
+async function previewEditImage(e) {
+  const file = e.target.files[0];
+  if (!file || !validateImage(file)) return;
+  editImageData = await readFileAsDataURL(file);
+  document.getElementById('editPreviewImg').src = editImageData;
+  document.getElementById('editPlaceholder').style.display = 'none';
+  document.getElementById('editPreviewWrap').style.display = 'inline-block';
+}
+
+function removeEditPreview() {
+  editImageData = null;
+  document.getElementById('editProdImageFile').value = '';
+  document.getElementById('editPreviewImg').src = '';
+  document.getElementById('editPlaceholder').style.display = 'block';
+  document.getElementById('editPreviewWrap').style.display = 'none';
+}
+
+// Drag & drop for edit
+const editUploadArea = document.getElementById('editUploadArea');
+if (editUploadArea) {
+  editUploadArea.addEventListener('dragover', (e) => { e.preventDefault(); editUploadArea.classList.add('dragover'); });
+  editUploadArea.addEventListener('dragleave', () => editUploadArea.classList.remove('dragover'));
+  editUploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    editUploadArea.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      const input = document.getElementById('editProdImageFile');
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      input.files = dt.files;
+      input.dispatchEvent(new Event('change'));
+    }
+  });
+}
+
+function getProducts() {
+  const adminProducts = JSON.parse(localStorage.getItem('rb_admin_products'));
+  if (adminProducts && adminProducts.length > 0) {
+    return adminProducts;
+  }
+  // First time: copy default PRODUCTS to localStorage so admin can edit them
+  localStorage.setItem('rb_admin_products', JSON.stringify(PRODUCTS));
+  return [...PRODUCTS];
+}
+
+function saveProducts(products) {
+  localStorage.setItem('rb_admin_products', JSON.stringify(products));
+}
+
+function showSection(name, el) {
+  document.querySelectorAll('[id^="section-"]').forEach(s => s.style.display = 'none');
+  document.getElementById('section-' + name).style.display = 'block';
+  document.querySelectorAll('.admin-nav a').forEach(a => a.classList.remove('active'));
+  if (el) el.classList.add('active');
+  return false;
+}
+
+function renderDashboard() {
+  const products = getProducts();
+  const allOrders = JSON.parse(localStorage.getItem('rb_orders')) || [];
+  const users = JSON.parse(localStorage.getItem('rb_users')) || [];
+
+  const revenue = allOrders.reduce((sum, o) => sum + o.total, 0);
+  document.getElementById('statRevenue').textContent = formatPrice(revenue);
+  document.getElementById('statOrders').textContent = allOrders.length;
+  document.getElementById('statProducts').textContent = products.length;
+  document.getElementById('statCustomers').textContent = users.length;
+
+  // Recent orders
+  const recentOrders = allOrders.slice(-5).reverse();
+  document.getElementById('recentOrdersTable').innerHTML = recentOrders.length ? recentOrders.map(o => `
+    <tr>
+      <td>#${o.id}</td>
+      <td>${o.shippingAddress.name}</td>
+      <td>${formatPrice(o.total)}</td>
+      <td><span class="status-badge status-${o.status}">${o.status}</span></td>
+      <td>${new Date(o.createdAt).toLocaleDateString()}</td>
+    </tr>
+  `).join('') : '<tr><td colspan="5" style="text-align:center; padding:20px;">No orders yet</td></tr>';
+
+  // Products table
+  document.getElementById('productsTable').innerHTML = products.map(p => `
+    <tr>
+      <td><img src="${p.image}" style="width:40px; height:40px; border-radius:4px; object-fit:cover;" onerror="this.src='https://via.placeholder.com/40'"></td>
+      <td>${p.name.length > 35 ? p.name.substring(0, 35) + '...' : p.name}</td>
+      <td>${p.category}</td>
+      <td>${formatPrice(p.price)}</td>
+      <td><span style="color:${p.stock < 10 ? '#F44336' : p.stock < 30 ? '#FF9800' : '#4CAF50'}; font-weight:600;">${p.stock}</span></td>
+      <td>
+        <div class="action-btns">
+          <button class="btn btn-sm btn-outline" onclick="openEditModal(${p.id})">✏️ Edit</button>
+          <button class="delete-btn" onclick="openDeleteModal(${p.id}, '${p.name.replace(/'/g, "\\'")}')">🗑</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  // All orders
+  document.getElementById('allOrdersTable').innerHTML = allOrders.length ? allOrders.map(o => `
+    <tr>
+      <td>#${o.id}</td>
+      <td>${o.items.length} items</td>
+      <td>${formatPrice(o.total)}</td>
+      <td><span class="status-badge status-${o.status}">${o.status}</span></td>
+      <td>${new Date(o.createdAt).toLocaleDateString()}</td>
+      <td>
+        <select onchange="updateOrderStatus('${o.id}', this.value)" style="padding:4px 8px; border-radius:4px; font-size:12px;">
+          <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Pending</option>
+          <option value="processing" ${o.status === 'processing' ? 'selected' : ''}>Processing</option>
+          <option value="shipped" ${o.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+          <option value="delivered" ${o.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+          <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+        </select>
+      </td>
+    </tr>
+  `).join('') : '<tr><td colspan="6" style="text-align:center; padding:20px;">No orders yet</td></tr>';
+
+  // Customers
+  document.getElementById('customersTable').innerHTML = users.length ? users.map(u => `
+    <tr>
+      <td>${u.name}</td>
+      <td>${u.email}</td>
+      <td>${new Date(u.createdAt).toLocaleDateString()}</td>
+    </tr>
+  `).join('') : '<tr><td colspan="3" style="text-align:center; padding:20px;">No registered customers</td></tr>';
+}
+
+// ===== EDIT MODAL =====
+function openEditModal(productId) {
+  const products = getProducts();
+  const p = products.find(prod => prod.id === productId);
+  if (!p) return;
+
+  editingProductId = productId;
+  editImageData = null;
+  document.getElementById('editProdId').value = p.id;
+  document.getElementById('editProdName').value = p.name;
+  document.getElementById('editProdCat').value = p.category;
+  document.getElementById('editProdPrice').value = p.price;
+  document.getElementById('editProdOrigPrice').value = p.originalPrice;
+  document.getElementById('editProdBrand').value = p.brand;
+  document.getElementById('editProdStock').value = p.stock;
+  document.getElementById('editProdRating').value = p.rating;
+  document.getElementById('editProdBadge').value = p.badge || '';
+  document.getElementById('editProdDesc').value = p.description || '';
+
+  // Show current image
+  const currentImg = document.getElementById('editCurrentImg');
+  if (p.image && p.image.startsWith('data:')) {
+    currentImg.src = p.image;
+  } else if (p.image) {
+    currentImg.src = p.image;
+  } else {
+    currentImg.style.display = 'none';
+  }
+  currentImg.style.display = 'block';
+
+  // Reset new image upload
+  document.getElementById('editProdImageFile').value = '';
+  document.getElementById('editPlaceholder').style.display = 'block';
+  document.getElementById('editPreviewWrap').style.display = 'none';
+
+  document.getElementById('editModal').classList.add('show');
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('show');
+  editingProductId = null;
+  editImageData = null;
+}
+
+async function saveProduct() {
+  if (!editingProductId) return;
+
+  const products = getProducts();
+  const index = products.findIndex(p => p.id === editingProductId);
+  if (index === -1) return;
+
+  // Use new image if uploaded, otherwise keep current
+  let newImage = products[index].image;
+  if (editImageData) {
+    newImage = editImageData;
+  }
+
+  products[index] = {
+    ...products[index],
+    name: document.getElementById('editProdName').value,
+    category: document.getElementById('editProdCat').value,
+    price: parseInt(document.getElementById('editProdPrice').value),
+    originalPrice: parseInt(document.getElementById('editProdOrigPrice').value),
+    brand: document.getElementById('editProdBrand').value,
+    stock: parseInt(document.getElementById('editProdStock').value),
+    rating: parseFloat(document.getElementById('editProdRating').value),
+    badge: document.getElementById('editProdBadge').value,
+    image: newImage,
+    description: document.getElementById('editProdDesc').value
+  };
+
+  saveProducts(products);
+  closeEditModal();
+  renderDashboard();
+  showToast('Product updated successfully!');
+}
+
+// ===== DELETE =====
+function openDeleteModal(productId, productName) {
+  deletingProductId = productId;
+  document.getElementById('deleteProdName').textContent = productName;
+  document.getElementById('deleteModal').classList.add('show');
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('show');
+  deletingProductId = null;
+}
+
+function deleteProduct() {
+  if (!deletingProductId) return;
+  closeEditModal();
+  document.getElementById('deleteModal').classList.add('show');
+}
+
+function confirmDelete() {
+  if (!deletingProductId) return;
+  let products = getProducts();
+  products = products.filter(p => p.id !== deletingProductId);
+  saveProducts(products);
+  closeDeleteModal();
+  renderDashboard();
+  showToast('Product deleted!');
+}
+
+// ===== ADD PRODUCT =====
+document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const products = getProducts();
+  const newId = Math.max(...products.map(p => p.id), 0) + 1;
+
+  if (!addImageData) {
+    showToast('Please upload a product image', 'error');
+    return;
+  }
+
+  const newProduct = {
+    id: newId,
+    name: document.getElementById('newProdName').value,
+    category: document.getElementById('newProdCat').value,
+    price: parseInt(document.getElementById('newProdPrice').value),
+    originalPrice: parseInt(document.getElementById('newProdOrigPrice').value),
+    brand: document.getElementById('newProdBrand').value,
+    stock: parseInt(document.getElementById('newProdStock').value),
+    rating: parseFloat(document.getElementById('newProdRating').value),
+    badge: 'new',
+    image: addImageData,
+    description: document.getElementById('newProdDesc').value,
+    reviews: 0
+  };
+
+  products.push(newProduct);
+  saveProducts(products);
+  e.target.reset();
+  addImageData = null;
+  removeAddPreview();
+  showToast('Product added successfully!');
+  showSection('products', document.querySelector('.admin-nav a:nth-child(2)'));
+});
+
+function updateOrderStatus(orderId, status) {
+  const allOrders = JSON.parse(localStorage.getItem('rb_orders')) || [];
+  const order = allOrders.find(o => o.id === orderId);
+  if (order) {
+    order.status = status;
+    localStorage.setItem('rb_orders', JSON.stringify(allOrders));
+    showToast('Order status updated!');
+    renderDashboard();
+  }
+}
+
+// Close modals on overlay click
+document.getElementById('editModal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeEditModal();
+});
+document.getElementById('deleteModal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeDeleteModal();
+});
+
+renderDashboard();
+</script>
+</body>
+</html>

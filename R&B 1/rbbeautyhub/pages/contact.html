@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Contact Us | R&T Beauty Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/animations.css">
+<link rel="icon" type="image/jpeg" href="../images/logo.png">
+</head>
+<body>
+
+<header class="header">
+  <div class="container header-inner">
+    <a href="../index.html" class="logo">
+      <img src="../images/logo.png" alt="R&T Beauty Hub" class="logo-img">
+    </a>
+    <div class="header-actions">
+      <a href="cart.html" class="header-action-link cart-link">
+        <svg width="22" height="22" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2z" fill="currentColor"/></svg>
+        <span>Cart</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="../index.html">Home</a> <span>/</span> <span>Contact Us</span></div>
+    <h1 class="page-title">Contact Us</h1>
+  </div>
+</div>
+
+<div class="container" style="padding:40px 0;">
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:40px;">
+    <div class="checkout-section">
+      <h3>Send us a message</h3>
+      <form id="contactForm">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" required placeholder="John Doe">
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" required placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label>Subject</label>
+          <input type="text" required placeholder="How can we help?">
+        </div>
+        <div class="form-group">
+          <label>Message</label>
+          <textarea rows="5" required placeholder="Your message..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Send Message</button>
+      </form>
+    </div>
+    <div>
+      <div class="checkout-section">
+        <h3>Contact Information</h3>
+        <div style="display:flex; flex-direction:column; gap:16px; margin-top:16px;">
+          <div><strong>📍 Address:</strong><br>123 Beauty Lane, Victoria Island, Lagos</div>
+          <div><strong>📞 Phone:</strong><br>+234 801 234 5678</div>
+          <div><strong>📧 Email:</strong><br>support@rbbeautyhub.com</div>
+          <div><strong>⏰ Hours:</strong><br>Mon - Sat: 9:00 AM - 8:00 PM</div>
+        </div>
+      </div>
+      <div class="checkout-section" style="margin-top:20px;">
+        <h3>Follow Us</h3>
+        <div style="display:flex; gap:8px; margin-top:12px;">
+          <span style="padding:8px 16px; background:#E91E63; color:#fff; border-radius:4px; font-size:12px;">Facebook</span>
+          <span style="padding:8px 16px; background:#9C27B0; color:#fff; border-radius:4px; font-size:12px;">Instagram</span>
+          <span style="padding:8px 16px; background:#2196F3; color:#fff; border-radius:4px; font-size:12px;">Twitter</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-bottom">
+    <div class="container"><div class="footer-bottom-inner"><p>&copy; 2026 R&T Beauty Hub. All rights reserved.</p></div></div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="../js/data.js"></script>
+<script src="../js/app.js"></script>
+<script src="../js/animations.js"></script>
+<script>
+document.getElementById('contactForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  showToast('Message sent! We\'ll get back to you soon.');
+  e.target.reset();
+});
+</script>
+</body>
+</html>
