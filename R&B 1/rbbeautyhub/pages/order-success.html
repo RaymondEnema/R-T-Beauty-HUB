@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Order Confirmed | R&T Beauty Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/animations.css">
+<link rel="icon" type="image/jpeg" href="../images/logo.png">
+</head>
+<body>
+
+<header class="header">
+  <div class="container header-inner">
+    <a href="../index.html" class="logo">
+      <img src="../images/logo.png" alt="R&T Beauty Hub" class="logo-img">
+    </a>
+  </div>
+</header>
+
+<div class="container">
+  <div class="order-success">
+    <div class="success-icon">✓</div>
+    <h2>Order Placed Successfully!</h2>
+    <p>Thank you for your order. We'll send you a confirmation email shortly.</p>
+    <div class="order-number" id="orderNumber"></div>
+    <p style="font-size:14px; color:#666;">You can track your order status in your account.</p>
+    <div style="display:flex; gap:12px; justify-content:center; margin-top:24px;">
+      <a href="orders.html" class="btn btn-primary">View My Orders</a>
+      <a href="../index.html" class="btn btn-outline">Continue Shopping</a>
+    </div>
+  </div>
+</div>
+
+<script src="../js/animations.js"></script>
+<script>
+const params = new URLSearchParams(window.location.search);
+const orderId = params.get('id');
+if (orderId) {
+  document.getElementById('orderNumber').textContent = `Order #${orderId}`;
+}
+</script>
+</body>
+</html>
